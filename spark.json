@@ -1,7 +1,7 @@
 {
   "name": "Arduino-AppleMidi-Library",
   "author": "Bob Race <boberace@hotmail.com>",
-  "license": "MIT",
+  "license": "MIT - I think",
   "version": "0.0.1",
   "description": "This is an attempt to copy the Arduino-AppleMidi-Library to Spark Core 'no clue what I am doing' "
 }
