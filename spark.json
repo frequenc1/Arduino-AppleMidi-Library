@@ -3,5 +3,5 @@
   "author": "Bob Race <boberace@hotmail.com>",
   "license": "MIT",
   "version": "0.0.1",
-  "description": "This is an attempt to copy of the Arduino-AppleMidi-Library to Spark Core 'no clue what I am doing' "
+  "description": "This is an attempt to copy the Arduino-AppleMidi-Library to Spark Core 'no clue what I am doing' "
 }
