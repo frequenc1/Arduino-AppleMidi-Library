@@ -3,18 +3,18 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		04/04/14
  *  License		GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 class AppleMIDI_Util {
 public:
 	static uint32_t readUInt32(unsigned char* buffer)

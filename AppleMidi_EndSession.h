@@ -1,21 +1,21 @@
 /*!
  *  @file		AppleMIDI_EndSession.h
  *  Project		Arduino AppleMIDI Library
- *	@brief		AppleMIDI Library for the Arduino 
+ *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		04/04/14
  *  License		GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
-#include "utility/AppleMidi_Util.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
+#include "AppleMidi_Util.h"
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 typedef struct AppleMIDI_EndSession {
 
 	uint8_t		signature[2];
@@ -36,7 +36,7 @@ typedef struct AppleMIDI_EndSession {
 		memcpy(command, amEndSession, sizeof(amEndSession));
 	}
 
-	void write(EthernetUDP* udp)
+	void write(UDP* udp)
 	{
 		udp->beginPacket(udp->remoteIP(), udp->remotePort());
 
@@ -46,7 +46,7 @@ typedef struct AppleMIDI_EndSession {
 		udp->write(AppleMIDI_Util::toBuffer(initiatorToken), sizeof(initiatorToken));
 		udp->write(AppleMIDI_Util::toBuffer(ssrc), sizeof(ssrc));
 
-		udp->endPacket(); 
+		udp->endPacket();
 		udp->flush(); // Waits for the transmission of outgoing serial data to complete
 
 #if (APPLEMIDI_DEBUG)

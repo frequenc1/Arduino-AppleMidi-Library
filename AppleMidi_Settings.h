@@ -3,14 +3,14 @@
  *  Project     Arduino AppleMIDI Library
  *  @brief      AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		04/04/14
- *  license     GPL 
+ *  license     GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Namespace.h"
+#include "AppleMidi_Namespace.h"
 
 // -----------------------------------------------------------------------------
 
@@ -46,8 +46,8 @@
 
 // Rtp UDP ports
 
-#define CONTROL_PORT     5004         
-#define RTP_PORT         5005   
+#define CONTROL_PORT     5004
+#define RTP_PORT         5005
 
 // -----------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		04/04/14
  *  License		GPL
  */
@@ -12,12 +12,12 @@
 
 #include "dissector.h"
 
-#include "utility/AppleMidi_Invitation.h"
-#include "utility/AppleMidi_AcceptInvitation.h"
-#include "utility/AppleMidi_ReceiverFeedback.h"
-#include "utility/AppleMidi_Syncronization.h"
-#include "utility/AppleMidi_BitrateReceiveLimit.h"
-#include "utility/AppleMidi_EndSession.h"
+#include "AppleMidi_Invitation.h"
+#include "AppleMidi_AcceptInvitation.h"
+#include "AppleMidi_ReceiverFeedback.h"
+#include "AppleMidi_Syncronization.h"
+#include "AppleMidi_BitrateReceiveLimit.h"
+#include "AppleMidi_EndSession.h"
 
 const uint8_t amInvitation          [] = {'I', 'N'};
 const uint8_t amAcceptInvitation    [] = {'O', 'K'};

@@ -3,22 +3,22 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.0
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		01/04/13
  *  License		GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
 
-#include "utility/AppleMidi_Util.h"
+#include "AppleMidi_Util.h"
 
 #define PAYLOADTYPE_RTPMIDI 97
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 typedef struct RtpMidi {
 	uint8_t		ddddd;
 	uint8_t		playLoadType;
@@ -32,7 +32,7 @@ typedef struct RtpMidi {
 		playLoadType = PAYLOADTYPE_RTPMIDI;
 	}
 
-	void beginWrite(EthernetUDP* udp)
+	void beginWrite(UDP* udp)
 	{
 		udp->beginPacket(udp->remoteIP(), udp->remotePort());
 
@@ -43,13 +43,12 @@ typedef struct RtpMidi {
 		udp->write(AppleMIDI_Util::toBuffer(ssrc), sizeof(ssrc));
 	}
 
-	void endWrite(EthernetUDP* udp)
+	void endWrite(UDP* udp)
 	{
-		udp->endPacket(); 
+		udp->endPacket();
 		udp->flush(); // Waits for the transmission of outgoing serial data to complete
 	}
 
 } RtpMidi_t;
 
 END_APPLEMIDI_NAMESPACE
-

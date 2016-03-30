@@ -3,7 +3,7 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.0
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		01/04/13
  *  License		GPL
  */
@@ -17,7 +17,7 @@
 #define RTPMIDI_PACKET_MAX_SIZE 96
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 /* Definitions for protocol name during dissector-register */
 #define RTP_MIDI_DISSECTOR_NAME "RFC 4695/6295 RTP-MIDI"
 #define RTP_MIDI_DISSECTOR_SHORTNAME "RTP-MIDI"

@@ -3,20 +3,20 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.0
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		01/04/13
  *  License		GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
 
-#include "utility/AppleMidi_Util.h"
+#include "AppleMidi_Util.h"
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 typedef struct AppleMIDI_AcceptInvitation {
 
 	uint8_t		signature[2];
@@ -37,7 +37,7 @@ typedef struct AppleMIDI_AcceptInvitation {
 		strcpy(this->name, (const char*)name);
 	}
 
-	void write(EthernetUDP* udp)
+	void write(UDP* udp)
 	{
 		udp->beginPacket(udp->remoteIP(), udp->remotePort());
 
@@ -48,7 +48,7 @@ typedef struct AppleMIDI_AcceptInvitation {
 		udp->write(AppleMIDI_Util::toBuffer(ssrc), sizeof(ssrc));
 		udp->write((uint8_t*)name, strlen(name) + 1);
 
-		udp->endPacket(); 
+		udp->endPacket();
 		udp->flush(); // Waits for the transmission of outgoing serial data to complete
 
 #if (APPLEMIDI_DEBUG)

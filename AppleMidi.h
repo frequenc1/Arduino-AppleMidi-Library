@@ -3,36 +3,37 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		RtpMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		02/04/14
  *  License		GPL
  */
 
 #pragma once
+#include "application.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
-
-#include "utility/RtpMidi.h"
+#include "RtpMidi.h"
 //#include "utility/IAppleMidi.h"
 
-#include "utility/AppleMidi_Invitation.h"
-#include "utility/AppleMidi_AcceptInvitation.h"
-#include "utility/AppleMidi_ReceiverFeedback.h"
-#include "utility/AppleMidi_Syncronization.h"
-#include "utility/AppleMidi_BitrateReceiveLimit.h"
-#include "utility/AppleMidi_EndSession.h"
+#include "AppleMidi_Invitation.h"
+#include "AppleMidi_AcceptInvitation.h"
+#include "AppleMidi_ReceiverFeedback.h"
+#include "AppleMidi_Syncronization.h"
+#include "AppleMidi_BitrateReceiveLimit.h"
+#include "AppleMidi_EndSession.h"
 
 //#include "utility/AppleMidi_Parser.h"
 //#include "utility/RtpMIDI_Parser.h"
 //#include "utility/packet-rtp.h"
-#include "utility/dissector.h"
+#include "dissector.h"
 
-#include <EthernetUdp.h>
+//#include <EthernetUdp.h>
 //#include <SPI.h>
 //#include <SD.h>
 
 #define APPLEMIDI_DEBUG 0
+#define UDP_TX_PACKET_MAX_SIZE 25
 
 BEGIN_APPLEMIDI_NAMESPACE
 
@@ -42,10 +43,10 @@ BEGIN_APPLEMIDI_NAMESPACE
  */
 class AppleMidi_Class //: public IAppleMidi, public IRtpMidi
 {
-public:
+	public:
 	//
-	EthernetUDP _controlUDP;
-	EthernetUDP _contentUDP;
+	UDP _controlUDP;
+	UDP _contentUDP;
 
 	Dissector _controlDissector;
 	Dissector _contentDissector;
@@ -72,7 +73,7 @@ public:
 
 	char Name[50];
 
-public:
+	public:
 	// Constructor and Destructor
 	AppleMidi_Class();
 	~AppleMidi_Class();
@@ -80,7 +81,7 @@ public:
 	static const int Port = CONTROL_PORT;
 
 	void begin(const char* name);
-	
+
 	uint32_t	getSynchronizationSource() { return _ssrc; }
 
 	void run();
@@ -111,17 +112,17 @@ public:
 	virtual void OnTuneRequest(void* sender);
 
 #if APPLEMIDI_BUILD_OUTPUT
-    
+
 public:
     void noteOn(DataByte inNoteNumber, DataByte inVelocity, Channel inChannel);
     void noteOff(DataByte inNoteNumber, DataByte inVelocity, Channel inChannel);
-    void programChange(DataByte inProgramNumber, Channel inChannel); 
+    void programChange(DataByte inProgramNumber, Channel inChannel);
     void controlChange(DataByte inControlNumber, DataByte inControlValue, Channel inChannel);
     void pitchBend(int inPitchValue,    Channel inChannel);
-    void pitchBend(double inPitchValue, Channel inChannel);   
+    void pitchBend(double inPitchValue, Channel inChannel);
     void polyPressure(DataByte inNoteNumber, DataByte inPressure, Channel inChannel);
-    void afterTouch(DataByte inPressure, Channel inChannel); 
-    void sysEx(unsigned int inLength, const byte* inArray, bool inArrayContainsBoundaries = true);    
+    void afterTouch(DataByte inPressure, Channel inChannel);
+    void sysEx(unsigned int inLength, const byte* inArray, bool inArrayContainsBoundaries = true);
     void timeCodeQuarterFrame(DataByte inTypeNibble, DataByte inValuesNibble);
     void timeCodeQuarterFrame(DataByte inData);
     void songPosition(unsigned int inBeats);
@@ -134,16 +135,16 @@ public:
     void systemReset();
     void clock();
     void tick();
-    
+
 public:
     void send(MidiType inType, DataByte inData1, DataByte inData2, Channel inChannel);
     void send(MidiType inType, DataByte inData1, DataByte inData2);
     void send(MidiType inType, DataByte inData);
     void send(MidiType inType);
-      
+
 private:
     StatusByte getStatus(MidiType inType, Channel inChannel) const;
-   
+
     void internalSend(Session_t*, MidiType inType, DataByte inData1, DataByte inData2, Channel inChannel);
     void internalSend(Session_t*, MidiType inType, DataByte inData1, DataByte inData2);
     void internalSend(Session_t*, MidiType inType, DataByte inData);
@@ -171,20 +172,20 @@ private:
 	void RtpSynchronization();
 
 #if APPLEMIDI_BUILD_INPUT
-    
+
 public:
     bool read();
     bool read(Channel inChannel);
-    
+
 private:
     StatusByte mRunningStatus_RX;
     Channel    _inputChannel;
-    
+
     // -------------------------------------------------------------------------
     // Input Callbacks
-    
+
 #if APPLEMIDI_USE_CALLBACKS
-    
+
 public:
     void OnConnected(void (*fptr)(char*));
     void OnDisconnected(void (*fptr)());
@@ -207,11 +208,11 @@ public:
     void OnReceiveStop(void (*fptr)(void));
     void OnReceiveActiveSensing(void (*fptr)(void));
     void OnReceiveSystemReset(void (*fptr)(void));
-    
+
 //    void disconnectCallbackFromType(MidiType inType);
 
 private:
-    
+
     inline void launchCallback();
 
     void (*mConnectedCallback)(char*);
@@ -236,8 +237,8 @@ private:
     void (*mStopCallback)(void);
     void (*mActiveSensingCallback)(void);
     void (*mSystemResetCallback)(void);
-  
-#endif // APPLEMIDI_USE_CALLBACKS    
+
+#endif // APPLEMIDI_USE_CALLBACKS
 
 #endif // APPLEMIDI_BUILD_INPUT
 
@@ -252,4 +253,3 @@ END_APPLEMIDI_NAMESPACE
 #endif // APPLEMIDI_AUTO_INSTANCIATE
 
 // -----------------------------------------------------------------------------
-

@@ -3,18 +3,18 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		02/04/14
  *  License		GPL
  */
 
 // http://www.blitter.com/~russtopia/MIDI/~jglatt/tech/midispec.htm
-
-#include "AppleMidi.h"
+#include "application.h"
+#include "AppleMidi_Class.h"
 
 //#include "utility/packet-rtp.h"
-#include "utility/packet-rtp-midi.h"
-#include "utility/packet-apple-midi.h"
+#include "packet-rtp-midi.h"
+#include "packet-apple-midi.h"
 
 #if !(APPLEMIDI_BUILD_INPUT) && !(APPLEMIDI_BUILD_OUTPUT)
 #   error To use AppleMIDI, you need to enable at least input or output.
@@ -30,7 +30,7 @@ Session_t	AppleMidi_Class::Sessions[MAX_SESSIONS];
 
 /*! \brief Default constructor for MIDI_Class. */
 AppleMidi_Class::AppleMidi_Class()
-{ 
+{
 #if APPLEMIDI_USE_CALLBACKS
 	// Initialise callbacks to NULL pointer
 	mConnectedCallback				= NULL;
@@ -65,7 +65,7 @@ AppleMidi_Class::AppleMidi_Class()
 }
 
 /*! \brief Default destructor for MIDI_Class.
- 
+
  This is not really useful for the Arduino, as it is never called...
  */
 AppleMidi_Class::~AppleMidi_Class()
@@ -73,7 +73,7 @@ AppleMidi_Class::~AppleMidi_Class()
 }
 
 /*! \brief Call the begin method in the setup() function of the Arduino.
- 
+
  All parameters are set to their default values:
  - Input channel set to 1 if no value is specified
  - Full thru mirroring
@@ -131,7 +131,7 @@ void AppleMidi_Class::run()
 {
 	byte _packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 
-	// 
+	//
 	int packetSize = _controlUDP.parsePacket();
 	while (_controlUDP.available() > 0)
 	{
@@ -141,7 +141,7 @@ void AppleMidi_Class::run()
 		_controlDissector.dissect();
 	}
 
-	// 
+	//
 	packetSize = _contentUDP.parsePacket();
 	while (_contentUDP.available() > 0)
 	{
@@ -195,7 +195,7 @@ void AppleMidi_Class::OnControlInvitation(void* sender, Invitation_t& invitation
 	Sessions[index].ssrc = 0;
 		// session exists already (maybe a resend of the invite, ignore)
 #endif
-//		return; 
+//		return;
 	}
 
 	// Find a free slot to remember this session in
@@ -250,7 +250,7 @@ void AppleMidi_Class::OnContentInvitation(void* sender, Invitation_t& invitation
 	{
 		Serial.print("hmm - control session does not exists for ");
 		Serial.println(invitation.ssrc, HEX);
-		return; 
+		return;
 	}
 
 	AppleMIDI_AcceptInvitation acceptInvitation(this->_ssrc, invitation.initiatorToken, Name);
@@ -311,7 +311,7 @@ void AppleMidi_Class::OnSyncronization(void* sender, Syncronization_t& synchroni
 		// TODO: send EndSession?
 //		AppleMIDI_EndSession endSession(this->_ssrc);
 //		endSession.write(&this->_controlUDP);
-		return; 
+		return;
 	}
 
 	synchronization.count++;
@@ -386,7 +386,7 @@ void AppleMidi_Class::OnEndSession(void* sender, EndSession_t& sessionEnd)
 		Serial.println("hmmm - ending session that has never started.");
 #endif
 		// TODO: shall we send an invite?
-		return; 
+		return;
 	}
 
 #if (APPLEMIDI_DEBUG) && (APPLEMIDI_DEBUG_VERBOSE)
@@ -406,12 +406,12 @@ void AppleMidi_Class::OnEndSession(void* sender, EndSession_t& sessionEnd)
 */
 bool AppleMidi_Class::PassesFilter(void* sender, DataByte type, DataByte channel)
 {
-    // This method handles recognition of channel 
+    // This method handles recognition of channel
     // (to know if the message is destinated to the Arduino)
-    
+
     //if (mMessage.type == InvalidType)
     //    return false;
-    
+
     // First, check if the received message is Channel
     if (type >= NoteOff && type <= PitchBend)
     {
@@ -421,13 +421,13 @@ bool AppleMidi_Class::PassesFilter(void* sender, DataByte type, DataByte channel
         {
             return true;
         }
-        else 
+        else
         {
             // We don't listen to this channel
             return false;
         }
     }
-    else 
+    else
     {
         // System messages are always received
         return true;
@@ -619,9 +619,9 @@ void AppleMidi_Class::OnTuneRequest(void* sender)
  \param inData1   The first data byte.
  \param inData2   The second data byte (if the message contains only 1 data byte,
  set this one to 0).
- \param inChannel The output channel on which the message will be sent 
+ \param inChannel The output channel on which the message will be sent
  (values from 1 to 16). Note: you cannot send to OMNI.
- 
+
  This is an internal method, use it only if you need to send raw data
  from your code, at your own risks.
  */
@@ -682,26 +682,26 @@ void AppleMidi_Class::send(MidiType inType)
  \param inData1   The first data byte.
  \param inData2   The second data byte (if the message contains only 1 data byte,
  set this one to 0).
- \param inChannel The output channel on which the message will be sent 
+ \param inChannel The output channel on which the message will be sent
  (values from 1 to 16). Note: you cannot send to OMNI.
- 
+
  This is an internal method, use it only if you need to send raw data
  from your code, at your own risks.
  */
 void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte inData1, DataByte inData2, Channel inChannel)
 {
     // Then test if channel is valid
-    if (inChannel >= MIDI_CHANNEL_OFF  || 
-        inChannel == MIDI_CHANNEL_OMNI || 
+    if (inChannel >= MIDI_CHANNEL_OFF  ||
+        inChannel == MIDI_CHANNEL_OMNI ||
         inType < NoteOff)
     {
-        
-#if APPLEMIDI_USE_RUNNING_STATUS    
+
+#if APPLEMIDI_USE_RUNNING_STATUS
         mRunningStatus_TX = InvalidType;
-#endif 
+#endif
         return; // Don't send anything
     }
-    
+
     if (inType <= PitchBend)  // Channel messages
     {
         // Protection: remove MSBs on data
@@ -709,7 +709,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
         inData2 &= 0x7F;
 
 		_rtpMidi.sequenceNr++;
-//		_rtpMidi.timestamp = 
+//		_rtpMidi.timestamp =
 		_rtpMidi.beginWrite(&_contentUDP);
 
 		// Length
@@ -719,7 +719,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
 		// Command Section
 
         const StatusByte status = getStatus(inType, inChannel);
-        
+
 #if APPLEMIDI_USE_RUNNING_STATUS
         // Check Running Status
         if (mRunningStatus_TX != status)
@@ -750,7 +750,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
 void AppleMidi_Class::internalSend(Session_t*, MidiType inType)
 {
 	_rtpMidi.sequenceNr++;
-//	_rtpMidi.timestamp = 
+//	_rtpMidi.timestamp =
 	_rtpMidi.beginWrite(&_contentUDP);
 
 	uint8_t length = 1;
@@ -758,12 +758,12 @@ void AppleMidi_Class::internalSend(Session_t*, MidiType inType)
 
 	byte octet = (byte)inType;
 
-    switch (inType) 
+    switch (inType)
     {
         case TuneRequest: // Not really real-time, but one byte anyway.
         case Clock:
         case Start:
-        case Stop:    
+        case Stop:
         case Continue:
         case ActiveSensing:
         case SystemReset:
@@ -775,9 +775,9 @@ void AppleMidi_Class::internalSend(Session_t*, MidiType inType)
     }
 
  	_rtpMidi.endWrite(&_contentUDP);
-   
-    // Do not cancel Running Status for real-time messages as they can be 
-    // interleaved within any message. Though, TuneRequest can be sent here, 
+
+    // Do not cancel Running Status for real-time messages as they can be
+    // interleaved within any message. Though, TuneRequest can be sent here,
     // and as it is a System Common message, it must reset Running Status.
 #if APPLEMIDI_USE_RUNNING_STATUS
     if (inType == TuneRequest) mRunningStatus_TX = InvalidType;
@@ -787,7 +787,7 @@ void AppleMidi_Class::internalSend(Session_t*, MidiType inType)
 void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte inData)
 {
 	_rtpMidi.sequenceNr++;
-//	_rtpMidi.timestamp = 
+//	_rtpMidi.timestamp =
 	_rtpMidi.beginWrite(&_contentUDP);
 
 	uint8_t length = 2;
@@ -795,7 +795,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
 
 	DataByte octet = (DataByte)inType;
 
-    switch (inType) 
+    switch (inType)
     {
         case TimeCodeQuarterFrame: // Not really real-time, but one byte anyway.
 			_contentUDP.write(&octet, 1);
@@ -807,9 +807,9 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
     }
 
  	_rtpMidi.endWrite(&_contentUDP);
-   
-    // Do not cancel Running Status for real-time messages as they can be 
-    // interleaved within any message. Though, TuneRequest can be sent here, 
+
+    // Do not cancel Running Status for real-time messages as they can be
+    // interleaved within any message. Though, TuneRequest can be sent here,
     // and as it is a System Common message, it must reset Running Status.
 #if APPLEMIDI_USE_RUNNING_STATUS
     if (inType == TuneRequest) mRunningStatus_TX = InvalidType;
@@ -819,7 +819,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
 void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte inData1, DataByte inData2)
 {
 	_rtpMidi.sequenceNr++;
-//	_rtpMidi.timestamp = 
+//	_rtpMidi.timestamp =
 	_rtpMidi.beginWrite(&_contentUDP);
 
 	uint8_t length = 3;
@@ -827,7 +827,7 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
 
 	DataByte octet = (DataByte)inType;
 
-    switch (inType) 
+    switch (inType)
     {
         case SongPosition: // Not really real-time, but one byte anyway.
 			_contentUDP.write(&octet, 1);
@@ -840,9 +840,9 @@ void AppleMidi_Class::internalSend(Session_t* session, MidiType inType, DataByte
     }
 
  	_rtpMidi.endWrite(&_contentUDP);
-   
-    // Do not cancel Running Status for real-time messages as they can be 
-    // interleaved within any message. Though, TuneRequest can be sent here, 
+
+    // Do not cancel Running Status for real-time messages as they can be
+    // interleaved within any message. Though, TuneRequest can be sent here,
     // and as it is a System Common message, it must reset Running Status.
 #if APPLEMIDI_USE_RUNNING_STATUS
     if (inType == TuneRequest) mRunningStatus_TX = InvalidType;
@@ -863,19 +863,19 @@ StatusByte AppleMidi_Class::getStatus(MidiType inType,
 
 // -----------------------------------------------------------------------------
 
-/*! \brief Send a Note On message 
- \param inNoteNumber  Pitch value in the MIDI format (0 to 127). 
- \param inVelocity    Note attack velocity (0 to 127). A NoteOn with 0 velocity 
+/*! \brief Send a Note On message
+ \param inNoteNumber  Pitch value in the MIDI format (0 to 127).
+ \param inVelocity    Note attack velocity (0 to 127). A NoteOn with 0 velocity
  is considered as a NoteOff.
- \param inChannel     The channel on which the message will be sent (1 to 16). 
- 
- Take a look at the values, names and frequencies of notes here: 
+ \param inChannel     The channel on which the message will be sent (1 to 16).
+
+ Take a look at the values, names and frequencies of notes here:
  http://www.phys.unsw.edu.au/jw/notes.html
  */
 void AppleMidi_Class::noteOn(DataByte inNoteNumber,
                              DataByte inVelocity,
                              Channel  inChannel)
-{ 
+{
 #if (APPLEMIDI_DEBUG)
 	Serial.print  ("< Note On (c=");
 	Serial.print  (inChannel);
@@ -886,24 +886,24 @@ void AppleMidi_Class::noteOn(DataByte inNoteNumber,
 	Serial.println(")");
 #endif
 
-	if (mNoteOnSendingEvent != 0)               
+	if (mNoteOnSendingEvent != 0)
 		mNoteOnSendingEvent(inChannel, inNoteNumber, inVelocity);
 
     send(NoteOn, inNoteNumber, inVelocity, inChannel);
 
-	if (mNoteOnSendEvent != 0)               
+	if (mNoteOnSendEvent != 0)
 		mNoteOnSendEvent(inChannel, inNoteNumber, inVelocity);
 }
 
 /*! \brief Send a Note Off message
- \param inNoteNumber  Pitch value in the MIDI format (0 to 127). 
+ \param inNoteNumber  Pitch value in the MIDI format (0 to 127).
  \param inVelocity    Release velocity (0 to 127).
  \param inChannel     The channel on which the message will be sent (1 to 16).
- 
+
  Note: you can send NoteOn with zero velocity to make a NoteOff, this is based
  on the Running Status principle, to avoid sending status messages and thus
  sending only NoteOn data. This method will always send a real NoteOff message.
- Take a look at the values, names and frequencies of notes here: 
+ Take a look at the values, names and frequencies of notes here:
  http://www.phys.unsw.edu.au/jw/notes.html
  */
 void AppleMidi_Class::noteOff(DataByte inNoteNumber,
@@ -920,16 +920,16 @@ void AppleMidi_Class::noteOff(DataByte inNoteNumber,
 	Serial.println(")");
 #endif
 
-	if (mNoteOffSendingEvent != 0)               
+	if (mNoteOffSendingEvent != 0)
 		mNoteOffSendingEvent(inChannel, inNoteNumber, inVelocity);
 
 	send(NoteOff, inNoteNumber, inVelocity, inChannel);
 
-	if (mNoteOffSendEvent != 0)               
+	if (mNoteOffSendEvent != 0)
 		mNoteOffSendEvent(inChannel, inNoteNumber, inVelocity);
 }
 
-/*! \brief Send a Program Change message 
+/*! \brief Send a Program Change message
  \param inProgramNumber The Program to select (0 to 127).
  \param inChannel       The channel on which the message will be sent (1 to 16).
  */
@@ -946,10 +946,10 @@ void AppleMidi_Class::programChange(DataByte inProgramNumber,
 	send(ProgramChange, inProgramNumber, 0, inChannel);
 }
 
-/*! \brief Send a Control Change message 
- \param inControlNumber The controller number (0 to 127). 
+/*! \brief Send a Control Change message
+ \param inControlNumber The controller number (0 to 127).
  \param inControlValue  The value for the specified controller (0 to 127).
- \param inChannel       The channel on which the message will be sent (1 to 16). 
+ \param inChannel       The channel on which the message will be sent (1 to 16).
  @see MidiControlChangeNumber
  */
 void AppleMidi_Class::controlChange(DataByte inControlNumber,
@@ -971,7 +971,7 @@ void AppleMidi_Class::controlChange(DataByte inControlNumber,
 /*! \brief Send a Polyphonic AfterTouch message (applies to a specified note)
  \param inNoteNumber  The note to apply AfterTouch to (0 to 127).
  \param inPressure    The amount of AfterTouch to apply (0 to 127).
- \param inChannel     The channel on which the message will be sent (1 to 16). 
+ \param inChannel     The channel on which the message will be sent (1 to 16).
  */
 void AppleMidi_Class::polyPressure(DataByte inNoteNumber,
                                        DataByte inPressure,
@@ -991,7 +991,7 @@ void AppleMidi_Class::polyPressure(DataByte inNoteNumber,
 
 /*! \brief Send a MonoPhonic AfterTouch message (applies to all notes)
  \param inPressure    The amount of AfterTouch to apply to all notes.
- \param inChannel     The channel on which the message will be sent (1 to 16). 
+ \param inChannel     The channel on which the message will be sent (1 to 16).
  */
 void AppleMidi_Class::afterTouch(DataByte inPressure,
                                      Channel inChannel)
@@ -1008,8 +1008,8 @@ void AppleMidi_Class::afterTouch(DataByte inPressure,
 }
 
 /*! \brief Send a Pitch Bend message using a signed integer value.
- \param inPitchValue  The amount of bend to send (in a signed integer format), 
- between MIDI_PITCHBEND_MIN and MIDI_PITCHBEND_MAX, 
+ \param inPitchValue  The amount of bend to send (in a signed integer format),
+ between MIDI_PITCHBEND_MIN and MIDI_PITCHBEND_MAX,
  center value is 0.
  \param inChannel     The channel on which the message will be sent (1 to 16).
  */
@@ -1029,8 +1029,8 @@ void AppleMidi_Class::pitchBend(int inPitchValue, Channel inChannel)
 
 
 /*! \brief Send a Pitch Bend message using a floating point value.
- \param inPitchValue  The amount of bend to send (in a floating point format), 
- between -1.0f (maximum downwards bend) 
+ \param inPitchValue  The amount of bend to send (in a floating point format),
+ between -1.0f (maximum downwards bend)
  and +1.0f (max upwards bend), center value is 0.0f.
  \param inChannel     The channel on which the message will be sent (1 to 16).
  */
@@ -1054,7 +1054,7 @@ void AppleMidi_Class::sysEx(unsigned int inLength,
                                 bool inArrayContainsBoundaries)
 {
 	_rtpMidi.sequenceNr++;
-//	_rtpMidi.timestamp = 
+//	_rtpMidi.timestamp =
 	_rtpMidi.beginWrite(&_contentUDP);
 
 	uint8_t length = inLength + 1 + ((inArrayContainsBoundaries) ? 0 : 2);
@@ -1078,17 +1078,17 @@ void AppleMidi_Class::sysEx(unsigned int inLength,
 	}
 
  	_rtpMidi.endWrite(&_contentUDP);
-   
-    // Do not cancel Running Status for real-time messages as they can be 
-    // interleaved within any message. Though, TuneRequest can be sent here, 
+
+    // Do not cancel Running Status for real-time messages as they can be
+    // interleaved within any message. Though, TuneRequest can be sent here,
     // and as it is a System Common message, it must reset Running Status.
 #if APPLEMIDI_USE_RUNNING_STATUS
     if (inType == TuneRequest) mRunningStatus_TX = InvalidType;
 #endif
 }
 
-/*! \brief Send a Tune Request message. 
- 
+/*! \brief Send a Tune Request message.
+
  When a MIDI unit receives this message,
  it should tune its oscillators (if equipped with any).
  */
@@ -1097,27 +1097,27 @@ void AppleMidi_Class::tuneRequest()
     send(TuneRequest);
 }
 
-/*! \brief . 
- A device sends out an Active Sense message (at least once) every 300 milliseconds 
- if there has been no other activity on the MIDI buss, to let other devices know 
- that there is still a good MIDI connection between the devices. 
+/*! \brief .
+ A device sends out an Active Sense message (at least once) every 300 milliseconds
+ if there has been no other activity on the MIDI buss, to let other devices know
+ that there is still a good MIDI connection between the devices.
 
  When a device receives an Active Sense message (from some other device), it should
- expect to receive additional Active Sense messages at a rate of one approximately 
- every 300 milliseconds, whenever there is no activity on the MIDI buss during that 
- time. (Of course, if there are other MIDI messages happening at least once every 300 
+ expect to receive additional Active Sense messages at a rate of one approximately
+ every 300 milliseconds, whenever there is no activity on the MIDI buss during that
+ time. (Of course, if there are other MIDI messages happening at least once every 300
  mSec, then Active Sense won't ever be sent. An Active Sense only gets sent if there
- is a 300 mSec "moment of silence" on the MIDI buss. You could say that a device that 
- sends out Active Sense "gets nervous" if it has nothing to do for over 300 mSec, and 
- so sends an Active Sense just for the sake of reassuring other devices that this device 
- still exists). If a message is missed (ie, 0xFE nor any other MIDI message is received 
- for over 300 mSec), then a device assumes that the MIDI connection is broken, and 
- turns off all of its playing notes (which were turned on by incoming Note On messages, 
- versus ones played on the local keyboard by a musician). Of course, if a device never 
- receives an Active Sense message to begin with, it should not expect them at all. So, 
- it takes one "nervous" device to start the process by initially sending out an Active 
- Sense message to the other connected devices during a 300 mSec moment of silence 
- on the MIDI bus. 
+ is a 300 mSec "moment of silence" on the MIDI buss. You could say that a device that
+ sends out Active Sense "gets nervous" if it has nothing to do for over 300 mSec, and
+ so sends an Active Sense just for the sake of reassuring other devices that this device
+ still exists). If a message is missed (ie, 0xFE nor any other MIDI message is received
+ for over 300 mSec), then a device assumes that the MIDI connection is broken, and
+ turns off all of its playing notes (which were turned on by incoming Note On messages,
+ versus ones played on the local keyboard by a musician). Of course, if a device never
+ receives an Active Sense message to begin with, it should not expect them at all. So,
+ it takes one "nervous" device to start the process by initially sending out an Active
+ Sense message to the other connected devices during a 300 mSec moment of silence
+ on the MIDI bus.
 
  (http://www.blitter.com/~russtopia/MIDI/~jglatt/tech/midispec/sense.htm)
  */
@@ -1126,29 +1126,29 @@ void AppleMidi_Class::activeSensing()
 	send(ActiveSensing);
 }
 
-/*! \brief 
+/*! \brief
  */
 void AppleMidi_Class::start()
 {
 	send(Start);
 }
 
-/*! \brief 
+/*! \brief
  */
 void AppleMidi_Class::_continue()
 {
 	send(Continue);
 }
 
-/*! \brief 
+/*! \brief
  */
 void AppleMidi_Class::stop()
 {
 	send(Stop);
 }
 
-/*! \brief Send a MIDI Time Code Quarter Frame. 
- 
+/*! \brief Send a MIDI Time Code Quarter Frame.
+
  \param inTypeNibble      MTC type
  \param inValuesNibble    MTC data
  See MIDI Specification for more information.
@@ -1159,10 +1159,10 @@ void AppleMidi_Class::timeCodeQuarterFrame(DataByte inTypeNibble, DataByte inVal
     timeCodeQuarterFrame(data);
 }
 
-/*! \brief Send a MIDI Time Code Quarter Frame. 
- 
+/*! \brief Send a MIDI Time Code Quarter Frame.
+
  See MIDI Specification for more information.
- \param inData  if you want to encode directly the nibbles in your program, 
+ \param inData  if you want to encode directly the nibbles in your program,
                 you can send the byte here.
  */
 void AppleMidi_Class::timeCodeQuarterFrame(DataByte inData)
@@ -1177,13 +1177,13 @@ void AppleMidi_Class::songPosition(unsigned int inBeats)
 {
 	byte octet1 = inBeats & 0x7F;
 	byte octet2 = (inBeats >> 7) & 0x7F;
- 
+
 	send(SongPosition, octet1, octet2);
 }
 
 /*! \brief Send a Song Select message */
 void AppleMidi_Class::songSelect(DataByte inSongNumber)
-{    
+{
 	byte octet = inSongNumber & 0x7F;
 
 	send(SongSelect, octet);
@@ -1192,19 +1192,19 @@ void AppleMidi_Class::songSelect(DataByte inSongNumber)
 
 /*! \brief Send a Song Select message */
 void AppleMidi_Class::systemReset()
-{    
+{
 	send(SystemReset);
 }
 
 /*! \brief Send a Song Select message */
 void AppleMidi_Class::clock()
-{    
+{
 	send(Clock);
 }
 
 /*! \brief Send a Song Select message */
 void AppleMidi_Class::tick()
-{    
+{
 	send(Tick);
 }
 

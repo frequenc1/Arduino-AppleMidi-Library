@@ -3,25 +3,25 @@
  *  Project		Arduino AppleMIDI Library
  *	@brief		AppleMIDI Library for the Arduino
  *	Version		0.3
- *  @author		lathoub 
+ *  @author		lathoub
  *	@date		04/04/14
  *  License		GPL
  */
 
 #pragma once
 
-#include "utility/AppleMidi_Settings.h"
-#include "utility/AppleMidi_Defs.h"
-#include "utility/AppleMidi_Util.h"
+#include "AppleMidi_Settings.h"
+#include "AppleMidi_Defs.h"
+#include "AppleMidi_Util.h"
 
-#include "utility/AppleMidi_Invitation.h"
-#include "utility/AppleMidi_EndSession.h"
-#include "utility/AppleMIDI_BitrateReceiveLimit.h"
+#include "AppleMidi_Invitation.h"
+#include "AppleMidi_EndSession.h"
+#include "AppleMIDI_BitrateReceiveLimit.h"
 
 #define APPLEMIDI_PACKET_MAX_SIZE 96
 
 BEGIN_APPLEMIDI_NAMESPACE
-	
+
 class AppleMIDI_Parser {
 private:
 	unsigned char _protocolBuffer[APPLEMIDI_PACKET_MAX_SIZE];
@@ -94,7 +94,7 @@ public:
 			//		break;
 			//}
 			// end start of protocol
-				
+
 			// start look for Apple Midi signature
 			// check for minimum length for amSignature
 			if (_protocolBufferIndex < sizeof(amSignature))
@@ -124,7 +124,7 @@ public:
 				if (position > 0)
 				{
 					AppleMIDI_Invitation invitation(_protocolBuffer, position);
-						 
+
 					if (mReceivedInvitationCallback != 0)
 						mReceivedInvitationCallback(_appleMidi, invitation);
 
@@ -139,7 +139,7 @@ public:
 				if (position > 0)
 				{
 					AppleMIDI_EndSession endSession(_protocolBuffer, position);
-						 
+
 					if (mReceivedEndSessionCallback != 0)
 						mReceivedEndSessionCallback(_appleMidi, endSession);
 
